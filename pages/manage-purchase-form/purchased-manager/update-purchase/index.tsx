@@ -32,9 +32,17 @@ const UpdatePurchase = () => {
   const [isUpdateModalVisible, setIsUpdateModalVisible] = useState(false);
   const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
   const [serviceName, setServiceName] = useState(''); // New state for service name
-  const [csname, setCsname] = useState(localStorage.getItem('csname') || '');
-
+  const [csname, setCsname] = useState('');
+  
+  useEffect(() => {
+    // Access localStorage only in the browser
+    if (typeof window !== 'undefined') {
+      const storedCsname = localStorage.getItem('csname');
+      setCsname(storedCsname || '');
+    }
+  }, []);
   const handleBack = () => {
+    if (typeof window !== 'undefined') {
     const transactionId = localStorage.getItem('transactionId');
     const totalPurchase = localStorage.getItem('totalPurchase');
     const csid = localStorage.getItem('csid');
@@ -48,6 +56,7 @@ const UpdatePurchase = () => {
         // If data is not available, just go back
         window.history.back();
     }
+  }
 }
  
   useEffect(() => {

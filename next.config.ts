@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true, // This will ignore TypeScript errors during the build process
   },
+  // // Add these two properties for GitHub Pages
+  output: "export",
+  basePath: "/inventoryapp",
 };
 
 export default nextConfig;
