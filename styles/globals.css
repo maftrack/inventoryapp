@@ -1,0 +1,25 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap');
+
+
+
+:root {
+    --ant-primary-color: #004f9b !important;
+    --div-price-height: 50px;
+  }
+  
+  .ant-btn-primary {
+    background-color: var(--ant-primary-color) !important;
+    border-color: var(--ant-primary-color) !important;
+  }
+  
+  .ant-btn-primary:hover {
+    background-color: #003b73 !important; /* Slightly darker blue on hover */
+    border-color: #003b73 !important;
+  }
+
+  Link{
+    color: white !important;
+  }

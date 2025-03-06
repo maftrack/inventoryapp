@@ -1,0 +1,156 @@
+import { useState } from "react";
+import { Table, Button, Modal, Form, Input, Select, Typography, Space, message, Spin } from "antd";
+import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import CustomCard from "../../components/Card";
+import Layout from "@/components/Layout";
+
+const { Title } = Typography;
+const { Option } = Select;
+
+const PricingCatalogueForm = ({ isSidebarOpen }) => {
+  const [form] = Form.useForm();
+  const [tiers, setTiers] = useState([
+    { id: 1, tier: "Tier 1", minQuantity: 0, maxQuantity: 10, creditPerUnit: 10 },
+    { id: 2, tier: "Tier 2", minQuantity: 11, maxQuantity: 50, creditPerUnit: 7 },
+    { id: 3, tier: "Tier 3", minQuantity: 51, maxQuantity: 100, creditPerUnit: 5 },
+    { id: 4, tier: "Tier 4", minQuantity: 101, maxQuantity: 500, creditPerUnit: 3 },
+  ]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [editingTier, setEditingTier] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("Pricing Catalogue");
+  const [loading, setLoading] = useState(false);
+
+  const showModal = (tier = null) => {
+    setEditingTier(tier);
+    setIsModalVisible(true);
+    form.setFieldsValue(tier || { tier: "", minQuantity: "", maxQuantity: "", creditPerUnit: "" });
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+    form.resetFields();
+  };
+
+  const handleSave = () => {
+    form.validateFields().then((values) => {
+      if (editingTier) {
+        setTiers((prev) => prev.map((t) => (t.id === editingTier.id ? { ...t, ...values } : t)));
+      } else {
+        setTiers((prev) => [...prev, { id: Date.now(), ...values }]);
+      }
+      handleCancel();
+      message.success("Pricing tier updated successfully!");
+    });
+  };
+
+  const handleDelete = (id) => {
+    setTiers((prev) => prev.filter((t) => t.id !== id));
+    message.success("Tier deleted successfully!");
+  };
+
+  const handleCategoryChange = (value) => {
+    setLoading(true);
+    setTimeout(() => {
+      setSelectedCategory(value);
+      setLoading(false);
+    }, 800); // Simulate a loading delay
+  };
+
+  const columns = [
+    { title: "Tier", dataIndex: "tier", key: "tier" },
+    { title: "Min Quantity", dataIndex: "minQuantity", key: "minQuantity" },
+    { title: "Max Quantity", dataIndex: "maxQuantity", key: "maxQuantity" },
+    { title: "Credit/Unit", dataIndex: "creditPerUnit", key: "creditPerUnit" },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_, record) => (
+        <>
+          <Button icon={<EditOutlined />} onClick={() => showModal(record)} style={{ marginRight: 8 }} />
+          <Button icon={<DeleteOutlined />} danger onClick={() => handleDelete(record.id)} />
+        </>
+      ),
+    },
+  ];
+
+  return (
+    <Layout style={{ minHeight: "100vh", padding: "20px" }}>
+    
+        <CustomCard title="Pricing Catalogue Form" fullWidth={!isSidebarOpen}>
+          <Title level={4}>Master Data - {selectedCategory}</Title>
+          <p style={{ fontStyle: "italic" }}>
+            Set up pricing tiers for each service category. Specify the minimum and maximum quantities, along with the
+            credit per unit for each tier.
+          </p>
+          <br />
+
+          <Form form={form} layout="vertical">
+            <Form.Item
+              label="Pricing Category"
+              name="pricingCategory"
+              rules={[{ required: true, message: "Please select a pricing category" }]}
+            >
+              <Select placeholder="Select a pricing category" onChange={handleCategoryChange}>
+                <Option value="Sensor Base Pricing">Sensor Base Pricing</Option>
+                <Option value="Tag Base Pricing">Tag Base Pricing</Option>
+                <Option value="Equipment Base Pricing">Equipment Base Pricing</Option>
+              </Select>
+            </Form.Item>
+          </Form>
+
+          <Spin spinning={loading}>
+            <Title level={5} style={{ marginBottom: 16 }}>
+              {selectedCategory} Tiers
+            </Title>
+
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => showModal()} style={{ marginBottom: 16 }}>
+              Add Tier
+            </Button>
+
+            <div className="w-full overflow-auto">
+  <Table className="w-full border-collapse"
+              dataSource={tiers}
+              columns={columns}
+              rowKey="id"
+              bordered
+              pagination={false}
+              title={() => (
+                <Title level={5} style={{ textAlign: "center", margin: 0 }}>
+                  {selectedCategory} Tiers
+                </Title>
+              )}
+              summary={() => (
+                <Table.Summary.Row>
+                  <Table.Summary.Cell index={0} />
+                  <Table.Summary.Cell index={1} colSpan={4} style={{ textAlign: "center", fontWeight: "bold" }}>
+                    {selectedCategory} Pricing Table
+                  </Table.Summary.Cell>
+                </Table.Summary.Row>
+              )}
+            />
+            </div>
+          </Spin>
+        </CustomCard>
+
+        <Modal title={editingTier ? "Edit Tier" : "Add Tier"} visible={isModalVisible} onCancel={handleCancel} onOk={handleSave}>
+          <Form form={form} layout="vertical">
+            <Form.Item name="tier" label="Tier Name" rules={[{ required: true, message: "Please enter a tier name" }]}>
+              <Input />
+            </Form.Item>
+            <Form.Item name="minQuantity" label="Min Quantity" rules={[{ required: true, message: "Please enter minimum quantity" }]}>
+              <Input type="number" />
+            </Form.Item>
+            <Form.Item name="maxQuantity" label="Max Quantity" rules={[{ required: true, message: "Please enter maximum quantity" }]}>
+              <Input type="number" />
+            </Form.Item>
+            <Form.Item name="creditPerUnit" label="Credit per Unit" rules={[{ required: true, message: "Please enter credit per unit" }]}>
+              <Input type="number" />
+            </Form.Item>
+          </Form>
+        </Modal>
+  
+    </Layout>
+  );
+};
+
+export default PricingCatalogueForm;
