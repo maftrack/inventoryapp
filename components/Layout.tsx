@@ -324,8 +324,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             </div>
           </li>
         </ul> */}
+
+
         <ul className="navbar-nav navbar-nav-right">
-          <li className="nav-item dropdown">
+          {/* <li className="nav-item dropdown">
             <a
               className="nav-link count-indicator dropdown-toggle"
               id="notificationDropdown"
@@ -388,8 +390,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 </div>
               </a>
             </div>
-          </li>
-          <li className="nav-item nav-profile dropdown">
+          </li> */}
+          {/* <li className="nav-item nav-profile dropdown">
             <a
               className="nav-link dropdown-toggle"
               href="#"
@@ -411,13 +413,15 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 Logout
               </a>
             </div>
-          </li>
-          <li className="nav-item nav-settings d-none d-lg-flex">
+          </li> */}
+          {/* <li className="nav-item nav-settings d-none d-lg-flex">
             <a className="nav-link" href="#">
               <i className="icon-ellipsis" />
             </a>
-          </li>
+          </li> */}
         </ul>
+
+        
         <button
           className="navbar-toggler navbar-toggler-right d-lg-none align-self-center"
           type="button"

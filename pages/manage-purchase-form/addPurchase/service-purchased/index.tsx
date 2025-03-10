@@ -498,7 +498,7 @@ const ServicePurchasedEdit = ({ purchase }) => {
         <p>
           {serviceToUnselect
             ? "Warning, the credit used on this service will also be removed. Are you sure you want to remove this service?"
-            : "Warning, the credit used on all services in this category will also be removed. Are you sure you want to remove this category?"}
+            : "Warning, the credit used on all services in this <category will also be removed. Are you sure you want to remove this category?"}
         </p>
       </Modal>
 

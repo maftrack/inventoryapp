@@ -23,6 +23,7 @@ const ServiceListForm = () => {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/services`);
             if (response.ok) {
                 const data = await response.json();
+                console.log(data)
                 setServices(data);
             } else {
                 throw new Error('Failed to fetch services');
@@ -79,12 +80,12 @@ const ServiceListForm = () => {
         try {
             // Prepare the updated service data
             const updatedService = {
-                id: editingService.id,
-                servicename: values.servicename,
-                description: values.description,
-                categoryid: values.categoryid, 
+                Id: editingService.id,
+               Servicename: values.servicename,
+                Description: values.description,
+                Categoryid: values.categoryid, 
             };
-    
+            console.log(editingService);
             // Send PUT request to update the service
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/services/${editingService.id}`, {
                 method: 'PUT',
@@ -135,7 +136,7 @@ const ServiceListForm = () => {
                     </Button>
                     <Table dataSource={services} rowKey="id" bordered pagination={{ pageSize: 5 }}>
     <Table.Column title="Service Name" dataIndex="servicename" />
-    <Table.Column title="Description" dataIndex="servicename" />
+    <Table.Column title="Description" dataIndex="description" />
     <Table.Column title="Category" dataIndex="categoryid" render={(categoryId) => {
         const category = categories.find(cat => cat.categoryid === categoryId); // Fix categoryId matching
         return category ? category.categoryName : 'N/A';
@@ -179,11 +180,7 @@ const ServiceListForm = () => {
                             >
                                 <Input />
                             </Form.Item>
-                            <Form.Item
-                                name="Description"
-                                label="Description"
-                                rules={[{ required: true, message: 'Please input the description!' }]}
-                            >
+                            <Form.Item name="Description" label="Description">
                                 <Input.TextArea />
                             </Form.Item>
                             <Form.Item
@@ -220,11 +217,7 @@ const ServiceListForm = () => {
                             >
                                 <Input />
                             </Form.Item>
-                            <Form.Item
-                                name="Description"
-                                label="Description"
-                                rules={[{ required: true, message: 'Please input the description!' }]}
-                            >
+                            <Form.Item name="description" label="Description">
                                 <Input.TextArea />
                             </Form.Item>
                             <Form.Item

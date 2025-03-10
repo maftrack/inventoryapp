@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true, // This will ignore TypeScript errors during the build process
   },
   //for GitHub Pages
-  // output: "export",
+   output: "export",
   // basePath: "/inventoryapp",
 };
 

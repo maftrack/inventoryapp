@@ -15,6 +15,7 @@ const PricingCategoryForm = () => {
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [editingCategory, setEditingCategory] = useState(null);
     const [form] = Form.useForm();
+    const [dynamicColumns, setDynamicColumns] = useState([]); // State for dynamic columns
 
     // Fetch pricing categories from the API
     const fetchPricingCategories = async () => {
@@ -24,6 +25,7 @@ const PricingCategoryForm = () => {
                 throw new Error('Failed to fetch pricing categories');
             }
             const data = await response.json();
+            console.log("Fetched Pricing Categories:", data); // Log the fetched data
             setPricingCategories(data);
         } catch (error) {
             toast.error('Failed to fetch pricing categories');
@@ -37,6 +39,7 @@ const PricingCategoryForm = () => {
     const showModal = () => {
         setIsModalVisible(true);
         form.resetFields();
+        setDynamicColumns([]); // Reset dynamic columns when opening the modal
     };
 
     const handleCancel = () => {
@@ -46,14 +49,14 @@ const PricingCategoryForm = () => {
     const handleSave = async () => {
         try {
             const values = await form.validateFields();
-                console.log(values);
             const newPricingCategory = {
                 id: uuidv4(), // Generate a new GUID
                 pricingCategoryName: values.name,
                 description: values.description,
-                volumeBase: values.volumeBase, // Include VolumeBase
+                volumeBase: values.volumeBase,
+                PricingCategoryDynamicColumns: dynamicColumns.map(col => ({ ColumnHeader: col.columnHeader })), // Prepare dynamic columns for saving
             };
-             
+
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pricingcategories`, {
                 method: 'POST',
                 headers: {
@@ -71,6 +74,7 @@ const PricingCategoryForm = () => {
             setPricingCategories([...pricingCategories, addedPricingCategory]);
             handleCancel();
             toast.success('Pricing Category added successfully!');
+            await fetchPricingCategories();
         } catch (error) {
             toast.error(error.message || 'Failed to add pricing category');
         }
@@ -92,15 +96,21 @@ const PricingCategoryForm = () => {
             toast.error(error.message || 'Failed to delete pricing category');
         }
     };
-
     const showEditModal = (category) => {
         setEditingCategory(category);
         setIsEditModalVisible(true);
         form.setFieldsValue({
             name: category.pricingCategoryName,
             description: category.description,
-            volumeBase: category.volumeBase, // Include VolumeBase
+            volumeBase: category.volumeBase,
         });
+    
+        // Check if pricingCategoryDynamicColumns exists and is an array
+        const dynamicColumnsData = Array.isArray(category.pricingCategoryDynamicColumns)
+            ? category.pricingCategoryDynamicColumns.map(col => ({ id: col.id, columnHeader: col.columnHeader }))
+            : []; // Default to an empty array if it doesn't exist
+    
+        setDynamicColumns(dynamicColumnsData); // Load dynamic columns for editing
     };
 
     const handleEditCancel = () => {
@@ -115,7 +125,8 @@ const PricingCategoryForm = () => {
                 ...editingCategory,
                 pricingCategoryName: values.name,
                 description: values.description,
-                volumeBase: values.volumeBase, // Include VolumeBase
+                volumeBase: values.volumeBase,
+                PricingCategoryDynamicColumns: dynamicColumns.map(col => ({ ColumnHeader: col.columnHeader })), // Prepare dynamic columns for saving
             };
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/pricingcategories/${editingCategory.id}`, {
@@ -138,10 +149,22 @@ const PricingCategoryForm = () => {
         }
     };
 
+    const handleAddDynamicColumn = () => {
+        setDynamicColumns([...dynamicColumns, { id: uuidv4(), columnHeader: '' }]); // Add a new dynamic column
+    };
+
+    const handleDynamicColumnChange = (id, value) => {
+        setDynamicColumns(dynamicColumns.map(col => (col.id === id ? { ...col, columnHeader: value } : col)));
+    };
+
+    const handleRemoveDynamicColumn = (id) => {
+        setDynamicColumns(dynamicColumns.filter(col => col.id !== id)); // Remove the dynamic column
+    };
+
     const columns = [
         { title: 'Pricing Category Name', dataIndex: 'pricingCategoryName', key: 'pricingCategoryName' },
         { title: 'Description', dataIndex: 'description', key: 'description' },
-        { title: 'Volume Base', dataIndex: 'volumeBase', key: 'volumeBase' }, // New field
+        { title: 'Volume Base', dataIndex: 'volumeBase', key: 'volumeBase' },
         {
             title: 'Actions',
             key: 'actions',
@@ -182,16 +205,43 @@ const PricingCategoryForm = () => {
                             <Form.Item
                                 name="name"
                                 label="Pricing Category Name"
-                                rules={[{ required: true, message: 'Please enter pricing category name' }]}
+                                rules={[ { required: true, message: 'Please input the pricing category name!' }]}
                             >
                                 <Input />
                             </Form.Item>
-                            <Form.Item name="description" label="Description">
-                                <Input.TextArea rows={4} />
-                            </Form.Item>
-                            <Form.Item name="volumeBase" label="Volume Base"> 
+                            <Form.Item
+                                name="description"
+                                label="Description"
+                                rules={[{ required: true, message: 'Please input the description!' }]}
+                            >
                                 <Input />
                             </Form.Item>
+                            <Form.Item
+                                name="volumeBase"
+                                label="Volume Base"
+                                rules={[{ required: true, message: 'Please input the volume base!' }]}
+                            >
+                                <Input />
+                            </Form.Item>
+                            <div>
+                                <Title level={5}>Dynamic Columns</Title>
+                                {dynamicColumns.map((col) => (
+                                    <div key={col.id} style={{ display: 'flex', marginBottom: 8 }}>
+                                        <Input
+                                            placeholder="Column Header"
+                                            value={col.columnHeader}
+                                            onChange={(e) => handleDynamicColumnChange(col.id, e.target.value)}
+                                            style={{ marginRight: 8 }}
+                                        />
+                                        <Button type="danger" onClick={() => handleRemoveDynamicColumn(col.id)}>
+                                            Remove
+                                        </Button>
+                                    </div>
+                                ))}
+                                <Button type="dashed" onClick={handleAddDynamicColumn} style={{ width: '100%' }}>
+                                    Add Dynamic Column
+                                </Button>
+                            </div>
                         </Form>
                     </Modal>
 
@@ -200,16 +250,43 @@ const PricingCategoryForm = () => {
                             <Form.Item
                                 name="name"
                                 label="Pricing Category Name"
-                                rules={[{ required: true, message: 'Please enter pricing category name' }]}
+                                rules={[{ required: true, message: 'Please input the pricing category name!' }]}
                             >
                                 <Input />
                             </Form.Item>
-                            <Form.Item name="description" label="Description">
-                                <Input.TextArea rows={4} />
-                            </Form.Item>
-                            <Form.Item name="volumeBase" label="Volume Base">
+                            <Form.Item
+                                name="description"
+                                label="Description"
+                                rules={[{ required: true, message: 'Please input the description!' }]}
+                            >
                                 <Input />
                             </Form.Item>
+                            <Form.Item
+                                name="volumeBase"
+                                label="Volume Base"
+                                rules={[{ required: true, message: 'Please input the volume base!' }]}
+                            >
+                                <Input />
+                            </Form.Item>
+                            <div>
+                                <Title level={5}>Dynamic Columns</Title>
+                                {dynamicColumns.map((col) => (
+                                    <div key={col.id} style={{ display: 'flex', marginBottom: 8 }}>
+                                        <Input
+                                            placeholder="Column Header"
+                                            value={col.columnHeader}
+                                            onChange={(e) => handleDynamicColumnChange(col.id, e.target.value)}
+                                            style={{ marginRight: 8 }}
+                                        />
+                                        <Button type="danger" onClick={() => handleRemoveDynamicColumn(col.id)}>
+                                            Remove
+                                        </Button>
+                                    </div>
+                                ))}
+                                <Button type="dashed" onClick={handleAddDynamicColumn} style={{ width: '100%' }}>
+                                    Add Dynamic Column
+                                </Button>
+                            </div>
                         </Form>
                     </Modal>
                 </div>

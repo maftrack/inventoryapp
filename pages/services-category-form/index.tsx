@@ -189,7 +189,7 @@ const ServicesForm = () => {
                 categoryName: values.name,
                 description: values.description,
             };
-
+          console.log(updatedCategory)
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories/${editingCategory.categoryid}`, {
                 method: 'PUT',
                 headers: {
